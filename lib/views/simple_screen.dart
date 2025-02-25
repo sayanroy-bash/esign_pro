@@ -27,7 +27,7 @@ class _SimpleScreenState extends State<SimpleScreen> {
   initializeSDK() {
     eSignProSDK
         .initializeSDK(
-      context, "kuldeepn@moneymul.com", "Test@123",
+      context, "kuldeepn@moneymul.com", "Test@111",
       //     brandingData: {
       //   "themeColor": "CA6F1E",
       //   "textColor": "FFFFFF",
@@ -66,7 +66,8 @@ class _SimpleScreenState extends State<SimpleScreen> {
                   children: [
                     Text(
                       'New e-sign Flow',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(
                       height: 20,
@@ -75,7 +76,8 @@ class _SimpleScreenState extends State<SimpleScreen> {
                       'New e-Sign',
                       () async {
                         try {
-                          eSignProSDK.eSignProFlow(context, onResponse: (ResponseFromSdk response) {
+                          eSignProSDK.eSignProFlow(context,
+                              onResponse: (ResponseFromSdk response) {
                             print(response);
                             //data
                           }
@@ -154,9 +156,10 @@ class _SimpleScreenState extends State<SimpleScreen> {
                     AppButton(
                       'E-Sign Gateway Flow',
                       () async {
-                        await eSignProSDK.eSignProGatewayFlowInitialize(context, requestData: {
-                          "emailId": "jasmines@moneymul.com",
-                        }, onResponse: (ResponseFromSdk response) {
+                        await eSignProSDK.eSignProGatewayFlowInitialize(context,
+                            requestData: {
+                              "emailId": "jasmines@moneymul.com",
+                            }, onResponse: (ResponseFromSdk response) {
                           print(response.message);
                           //data
                         });
@@ -926,7 +929,8 @@ class _SimpleScreenState extends State<SimpleScreen> {
                     children: [
                       Text(
                         'Issue with SDK initialization',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       // AppButton(
                       //   'Response set',
