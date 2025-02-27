@@ -7,6 +7,11 @@ import 'package:demo_sdk/view/widgets/text_form_filed.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+Future<Map<String, dynamic>> loadJsonFilesD() async {
+  String jsonString = await rootBundle.loadString('assets/jsonMain/new.json');
+  return json.decode(jsonString);
+}
+
 class AdvanceJsonView extends StatefulWidget {
   const AdvanceJsonView({super.key});
 
@@ -18,54 +23,71 @@ enum Editors { text, tree }
 
 class _AdvanceJsonViewState extends State<AdvanceJsonView> {
   @override
-  TextEditingController controller = TextEditingController()..text = stringifyData("", 0, true);
+  TextEditingController controller = TextEditingController()
+    ..text = stringifyData("", 0, true);
   List<Editors> editors = const [Editors.text, Editors.tree];
   TextEditingController nameController = TextEditingController();
   List<String> stepsList = [];
-  List<String> flowList = [
-    "Initialization with Theming",
-    "New e-sign Flow",
-    "E-Sign Gateway Flow",
-  ];
+  List<String> flowLists = [];
+  List<String> flowList = [];
+  Map<String, dynamic> jsonData={};
+  String selectedFile = "";
+  String selectedFlow = "";
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      loadJsonFiles();
+      loadJsonFilesData();
+      // loadJsonFiles();
     });
-    selectedFlow = flowList[0];
-    //jsonData = step1;
   }
 
-  loadJsonFiles() async {
-    final assetManifest = await AssetManifest.loadFromAssetBundle(rootBundle);
-    final jsonAssetsList = assetManifest.listAssets().where((string) => string.startsWith("assets/jsonData/")).toList();
-    print(jsonAssetsList);
-    for (var jsonList in jsonAssetsList) {
-      var fileName = jsonList.split('/').last;
-      stepsList.add(fileName);
-    }
-    if (stepsList.length > 0) {
-      String jsonString = await rootBundle.loadString('assets/jsonData/${stepsList[0]}');
-      controller.text = stringifyData(jsonDecode(jsonString), 0, true);
-      selectedFile = stepsList[0];
-    }
+
+
+  loadJsonFilesData() async {
+    jsonData = await loadJsonFilesD();
+    String jsondata='';
+    jsonData.forEach((key, value) {
+      flowList.add('$key');
+      if(stepsList.length ==0) {
+        jsonData['$key'].forEach((k, v) {
+          stepsList.add('$k');
+          if(jsondata ==''){
+            controller.text  = stringifyData(v, 0, true);
+          }
+        });
+      }
+    });
+    setState(() {
+      flowList=flowList;
+      stepsList=stepsList; // Reset dropdown value
+    });
+    selectedFile = stepsList[0];
+    selectedFlow = flowList[0];
+  }
+
+  setMainJsonData(value) async {
+    selectedFlow = value;
+    stepsList=[];
+    // print(jsonData[value]);
+    jsonData[value].forEach((key, v) {
+      stepsList.add('$key');
+      controller.text  = stringifyData(v, 0, true);
+    });
+    print(stepsList);
+    selectedFile = stepsList[0];
     setState(() {});
   }
 
   setJsonData(value) async {
-    String jsonString = await rootBundle.loadString('assets/jsonData/${value}').then((value){
-      print(value);
-      return value;
-    });
     selectedFile = value;
-    controller.text = stringifyData(jsonDecode(jsonString), 0, true);
+    controller.text = stringifyData(jsonData[selectedFlow][selectedFile], 0, true);
     print(controller.text);
+    setState(() {});
   }
 
-  String selectedFile = "";
-  String selectedFlow = "";
+
   void copyData() async {
     await Clipboard.setData(
       ClipboardData(text: controller!.text),
@@ -157,7 +179,7 @@ class _AdvanceJsonViewState extends State<AdvanceJsonView> {
                               ))
                           .toList(),
                       onChanged: (value) {
-                        selectedFlow = value!;
+                        setMainJsonData(value);
                       },
                     ),
                     SizedBox(
@@ -209,7 +231,9 @@ class _AdvanceJsonViewState extends State<AdvanceJsonView> {
                         try {
                           if (selectedFlow == "Initialization with Theming") {
                             eSignProSDK
-                                .initializeSDK(context, "syedam@moneymul.com", "Test@123", brandingData: jsonDecode(controller.text))
+                                .initializeSDK(
+                                    context, "syedam@moneymul.com", "Test@123",
+                                    brandingData: jsonDecode(controller.text))
                                 .then((value) {
                               if (value.status == 200) {
                                 eSignProSDK.eSignProFlow(
@@ -218,9 +242,11 @@ class _AdvanceJsonViewState extends State<AdvanceJsonView> {
                               }
                             });
                           } else if (selectedFlow == "New e-sign Flow") {
-                            eSignProSDK.eSignProFlow(context, requestData: jsonDecode(controller.text));
+                            eSignProSDK.eSignProFlow(context,
+                                requestData: jsonDecode(controller.text));
                           } else if (selectedFlow == "E-Sign Gateway Flow") {
-                            eSignProSDK.eSignProGatewayFlowInitialize(context, requestData: jsonDecode(controller.text));
+                            eSignProSDK.eSignProGatewayFlowInitialize(context,
+                                requestData: jsonDecode(controller.text));
                           }
                           // var fileName = selectedFile.split('.').first;
                           // if (fileName.toLowerCase().contains("step1")) {
